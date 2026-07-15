@@ -33,4 +33,16 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// update a user
+router.put('/:id', async (req, res) => {
+  const user = await User.findByPk(req.params.id);
+
+  if (user) {
+    user.username = req.body.username;
+    await user.save();
+    res.json(user);
+  } else {
+    res.status(404).end();
+  }
+});
 module.exports = router;

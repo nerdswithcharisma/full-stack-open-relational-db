@@ -14,37 +14,42 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
   },
 });
 
-class Note extends Model {}
+class Blog extends Model {}
 
 // define the model
-Note.init(
+Blog.init(
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    content: {
+    author: {
+      type: DataTypes.TEXT,
+    },
+    url: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    important: {
-      type: DataTypes.BOOLEAN,
+    title: {
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
-    date: {
-      type: DataTypes.DATE,
+    likes: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
   {
     sequelize,
     underscored: true,
     timestamps: false,
-    modelName: 'note',
+    modelName: 'blog',
   },
 );
 
 // create table if it doesn't exist
-Note.sync();
+Blog.sync();
 
 // start the server
 const PORT = process.env.PORT || 3001;
@@ -55,42 +60,29 @@ app.listen(PORT, () => {
 // parse JSON bodies
 app.use(express.json());
 
-// get all notes
-app.get('/api/notes', async (req, res) => {
-  const notes = await Note.findAll();
-  res.json(notes);
+// get all blogs
+app.get('/api/blogs', async (req, res) => {
+  const blogs = await Blog.findAll();
+  res.json(blogs);
 });
 
-// create a new note
-app.post('/api/notes', async (req, res) => {
+// create a new blog
+app.post('/api/blogs', async (req, res) => {
   try {
-    const note = await Note.create({ ...req.body, date: new Date() });
-    console.log(notes.map((n) => n.toJSON()));
-    return res.json(note);
+    const blog = await Blog.create(req.body);
+    return res.json(blog);
   } catch (error) {
     return res.status(400).json({ error });
   }
 });
 
-// get a single note
-app.get('/api/notes/:id', async (req, res) => {
-  const note = await Note.findByPk(req.params.id);
+// delete a blog post
+app.delete('/api/blogs/:id', async (req, res) => {
+  const blog = await Blog.findByPk(req.params.id);
 
-  if (note) {
-    res.json(note.toJSON());
-  } else {
-    res.status(404).end();
-  }
-});
-
-// edit a note
-app.put('/api/notes/:id', async (req, res) => {
-  const note = await Note.findByPk(req.params.id);
-
-  if (note) {
-    note.important = req.body.important;
-    await note.save();
-    res.json(note);
+  if (blog) {
+    await blog.destroy();
+    res.status(204).end();
   } else {
     res.status(404).end();
   }

@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
 const { Note, Blog, User } = require('../models');
+const { tokenExtractor, isAdmin } = require('../util/middleware');
 
 // get all users
 router.get('/', async (req, res) => {
@@ -36,15 +37,33 @@ router.get('/:id', async (req, res) => {
 });
 
 // update a user
-router.put('/:id', async (req, res) => {
-  const user = await User.findByPk(req.params.id);
+// router.put('/:id', async (req, res) => {
+//   const user = await User.findByPk(req.params.id);
+
+//   if (user) {
+//     user.username = req.body.username;
+//     await user.save();
+//     res.json(user);
+//   } else {
+//     res.status(404).end();
+//   }
+// });
+
+// admin route to disable users
+router.put('/:username', tokenExtractor, isAdmin, async (req, res) => {
+  const user = await User.findOne({
+    where: {
+      username: req.params.username,
+    },
+  });
 
   if (user) {
-    user.username = req.body.username;
+    user.disabled = req.body.disabled;
     await user.save();
     res.json(user);
   } else {
     res.status(404).end();
   }
 });
+
 module.exports = router;

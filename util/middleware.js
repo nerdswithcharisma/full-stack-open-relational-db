@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const { SECRET } = require('./config');
+const { User } = require('../models');
 
 // centralized error handler
 const errorHandler = (error, request, response, next) => {
@@ -35,7 +36,19 @@ const tokenExtractor = (req, res, next) => {
   next();
 };
 
+// check if the user is an admin
+const isAdmin = async (req, res, next) => {
+  const user = await User.findByPk(req.decodedToken.id);
+
+  if (!user.admin) {
+    return res.status(401).json({ error: 'operation not allowed' });
+  }
+
+  next();
+};
+
 module.exports = {
   errorHandler,
   tokenExtractor,
+  isAdmin,
 };

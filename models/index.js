@@ -7,21 +7,10 @@ User.hasMany(Note);
 Note.belongsTo(User);
 
 User.hasMany(Blog);
-Blog.belongsTo(User, {
-  foreignKey: {
-    allowNull: false,
-  },
-});
-
-const syncModels = async () => {
-  await User.sync({ alter: true });
-  await Note.sync({ alter: true });
-  await Blog.sync({ alter: true });
-};
+Blog.belongsTo(User);
 
 module.exports = {
   Note,
   Blog,
   User,
-  syncModels,
 };

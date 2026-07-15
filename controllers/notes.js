@@ -1,6 +1,8 @@
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
 
-const { Note } = require('../models');
+const { Note, User } = require('../models');
+const { SECRET } = require('../util/config');
 
 // middleware note finder
 const noteFinder = async (req, res, next) => {
@@ -12,16 +14,44 @@ const noteFinder = async (req, res, next) => {
   next();
 };
 
+// verify JWT from Authorization header
+const tokenExtractor = (req, res, next) => {
+  const authorization = req.get('authorization');
+
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    try {
+      req.decodedToken = jwt.verify(authorization.substring(7), SECRET);
+    } catch (error) {
+      return res.status(401).json({ error: 'token invalid' });
+    }
+  } else {
+    return res.status(401).json({ error: 'token missing' });
+  }
+
+  next();
+};
+
 // get all notes
 router.get('/', async (req, res) => {
-  const notes = await Note.findAll();
+  const notes = await Note.findAll({
+    attributes: { exclude: ['userId'] },
+    include: {
+      model: User,
+      attributes: ['name'],
+    },
+  });
   res.json(notes);
 });
 
-// create a new note
-router.post('/', async (req, res) => {
+// create a new note (requires valid token)
+router.post('/', tokenExtractor, async (req, res) => {
   try {
-    const note = await Note.create({ ...req.body, date: new Date() });
+    const user = await User.findByPk(req.decodedToken.id);
+    const note = await Note.create({
+      ...req.body,
+      userId: user.id,
+      date: new Date(),
+    });
     res.json(note);
   } catch (error) {
     return res.status(400).json({ error });

@@ -10,9 +10,14 @@ const blogsRouter = require('./controllers/blogs');
 const authorsRouter = require('./controllers/authors');
 const userRouter = require('./controllers/users');
 const loginRouter = require('./controllers/login');
+const resetRouter = require('./controllers/reset');
 
 // parse JSON bodies
 app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.sendStatus(200);
+});
 
 // mount routes
 app.use('/api/notes', notesRouter);
@@ -20,6 +25,7 @@ app.use('/api/blogs', blogsRouter);
 app.use('/api/authors', authorsRouter);
 app.use('/api/users', userRouter);
 app.use('/api/login', loginRouter);
+app.use('/api/reset', resetRouter);
 
 app.use(errorHandler);
 

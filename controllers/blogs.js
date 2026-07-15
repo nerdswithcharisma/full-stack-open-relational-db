@@ -52,18 +52,12 @@ router.post('/', tokenExtractor, async (req, res) => {
     return res.status(401).json({ error: 'invalid user' });
   }
 
-  const { userId, user_id, author, ...blogData } = req.body;
-
-  console.log('🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
-  console.log(userId, user, author);
+  const { userId, user_id, ...blogData } = req.body;
 
   const blog = await Blog.create({
     ...blogData,
-    author: user.name,
     userId: user.id,
   });
-
-  console.log('created author:', blog.author);
 
   res.json(blog);
 });

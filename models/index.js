@@ -13,13 +13,15 @@ Blog.belongsTo(User, {
   },
 });
 
-// create table if it doesn't exist
-Note.sync({ alter: true });
-Blog.sync({ alter: true });
-User.sync({ alter: true });
+const syncModels = async () => {
+  await User.sync({ alter: true });
+  await Note.sync({ alter: true });
+  await Blog.sync({ alter: true });
+};
 
 module.exports = {
   Note,
   Blog,
   User,
+  syncModels,
 };

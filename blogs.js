@@ -1,8 +1,11 @@
 require('dotenv').config();
+require('express-async-errors');
 const { DataTypes, Model, Sequelize } = require('sequelize');
 
 const express = require('express');
 const app = express();
+
+const { errorHandler } = require('./util/middleware');
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
@@ -79,12 +82,8 @@ app.get('/api/blogs/:id', async (req, res) => {
 
 // create a new blog
 app.post('/api/blogs', async (req, res) => {
-  try {
-    const blog = await Blog.create(req.body);
-    return res.json(blog);
-  } catch (error) {
-    return res.status(400).json({ error });
-  }
+  const blog = await Blog.create(req.body);
+  return res.json(blog);
 });
 
 // delete a blog post
@@ -111,3 +110,5 @@ app.put('/api/blogs/:id', async (req, res) => {
     res.status(404).end();
   }
 });
+
+app.use(errorHandler);

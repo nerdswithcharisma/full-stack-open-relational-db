@@ -1,5 +1,4 @@
 require('dotenv').config();
-require('express-async-errors');
 const { DataTypes, Model, Sequelize } = require('sequelize');
 
 const express = require('express');

@@ -3,6 +3,7 @@ const app = express();
 
 const { PORT } = require('./util/config');
 const { connectToDatabase } = require('./util/db');
+const { errorHandler } = require('./util/middleware');
 
 const notesRouter = require('./controllers/notes');
 const userRouter = require('./controllers/users');
@@ -15,6 +16,8 @@ app.use(express.json());
 app.use('/api/notes', notesRouter);
 app.use('/api/users', userRouter);
 app.use('/api/login', loginRouter);
+
+app.use(errorHandler);
 
 const start = async () => {
   await connectToDatabase();

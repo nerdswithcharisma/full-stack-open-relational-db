@@ -2,7 +2,16 @@
 const errorHandler = (error, request, response, next) => {
   console.error(error.message);
 
-  return response.status(400).json({ error });
+  if (
+    error.name === 'SequelizeValidationError' ||
+    error.name === 'SequelizeUniqueConstraintError'
+  ) {
+    return response.status(400).json({
+      error: error.errors.map((e) => e.message),
+    });
+  }
+
+  return response.status(400).json({ error: [error.message] });
 };
 
 module.exports = {

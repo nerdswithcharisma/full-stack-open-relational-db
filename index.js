@@ -1,97 +1,23 @@
-require('dotenv').config();
-const { DataTypes, Model, Sequelize } = require('sequelize');
-
 const express = require('express');
 const app = express();
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
-});
+const { PORT } = require('./util/config');
+const { connectToDatabase } = require('./util/db');
 
-class Note extends Model {}
-
-// define the model
-Note.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    content: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    important: {
-      type: DataTypes.BOOLEAN,
-    },
-    date: {
-      type: DataTypes.DATE,
-    },
-  },
-  {
-    sequelize,
-    underscored: true,
-    timestamps: false,
-    modelName: 'note',
-  },
-);
-
-// create table if it doesn't exist
-Note.sync();
-
-// start the server
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+const notesRouter = require('./controllers/notes');
 
 // parse JSON bodies
 app.use(express.json());
 
-// get all notes
-app.get('/api/notes', async (req, res) => {
-  const notes = await Note.findAll();
-  res.json(notes);
-});
+// mount notes routes
+app.use('/api/notes', notesRouter);
 
-// create a new note
-app.post('/api/notes', async (req, res) => {
-  try {
-    const note = await Note.create({ ...req.body, date: new Date() });
-    console.log(notes.map((n) => n.toJSON()));
-    return res.json(note);
-  } catch (error) {
-    return res.status(400).json({ error });
-  }
-});
+const start = async () => {
+  await connectToDatabase();
+  // start the server
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+};
 
-// get a single note
-app.get('/api/notes/:id', async (req, res) => {
-  const note = await Note.findByPk(req.params.id);
-
-  if (note) {
-    res.json(note.toJSON());
-  } else {
-    res.status(404).end();
-  }
-});
-
-// edit a note
-app.put('/api/notes/:id', async (req, res) => {
-  const note = await Note.findByPk(req.params.id);
-
-  if (note) {
-    note.important = req.body.important;
-    await note.save();
-    res.json(note);
-  } else {
-    res.status(404).end();
-  }
-});
+start();

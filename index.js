@@ -6,6 +6,7 @@ const { connectToDatabase } = require('./util/db');
 const { errorHandler } = require('./util/middleware');
 
 const notesRouter = require('./controllers/notes');
+const blogsRouter = require('./controllers/blogs');
 const userRouter = require('./controllers/users');
 const loginRouter = require('./controllers/login');
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // mount routes
 app.use('/api/notes', notesRouter);
+app.use('/api/blogs', blogsRouter);
 app.use('/api/users', userRouter);
 app.use('/api/login', loginRouter);
 

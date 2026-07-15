@@ -57,8 +57,14 @@ router.post('/', tokenExtractor, async (req, res) => {
 });
 
 // delete a blog post
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', tokenExtractor, async (req, res) => {
   const blog = await Blog.findByPk(req.params.id);
+
+  const user = await User.findByPk(req.decodedToken.id);
+
+  if (!user || blog.userId !== user.id) {
+    return res.status(401).json({ error: 'invalid user' });
+  }
 
   if (blog) {
     await blog.destroy();

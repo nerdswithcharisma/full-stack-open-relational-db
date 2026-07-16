@@ -58,6 +58,7 @@ router.get('/:id', async (req, res) => {
   }
 
   const user = await User.findByPk(req.params.id, {
+    attributes: { exclude: [''] },
     include: [
       {
         model: Note,
@@ -91,11 +92,18 @@ router.get('/:id', async (req, res) => {
       },
     ],
   });
+
   if (user) {
-    const userJson = user.toJSON();
-    userJson.note_count = userJson.notes.length;
-    delete userJson.notes;
-    res.json(userJson);
+    let teams = undefined;
+    if (req.query.teams) {
+    }
+
+    teams = await user.getTeams({
+      attributes: ['name'],
+      joinTableAttributes: [],
+    });
+
+    res.json({ ...user.toJSON(), teams });
   } else {
     res.status(404).end();
   }

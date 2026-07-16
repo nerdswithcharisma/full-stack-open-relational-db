@@ -5,6 +5,7 @@ const Team = require('./team');
 const Membership = require('./membership');
 const UserNotes = require('./userNote');
 const ReadingList = require('./readingList');
+const Session = require('./session');
 
 // joins
 User.hasMany(Note);
@@ -22,6 +23,9 @@ Note.belongsToMany(User, { through: UserNotes, as: 'users_marked' });
 User.belongsToMany(Blog, { through: ReadingList, as: 'readings' });
 Blog.belongsToMany(User, { through: ReadingList, as: 'users_reading' });
 
+User.hasMany(Session);
+Session.belongsTo(User);
+
 module.exports = {
   Note,
   Blog,
@@ -30,4 +34,5 @@ module.exports = {
   Membership,
   UserNotes,
   ReadingList,
+  Session,
 };

@@ -2,13 +2,22 @@ const Sequelize = require('sequelize');
 const { DATABASE_URL } = require('./config');
 const { Umzug, SequelizeStorage } = require('umzug');
 
+const isLocalDb =
+  !DATABASE_URL ||
+  DATABASE_URL.includes('localhost') ||
+  DATABASE_URL.includes('127.0.0.1') ||
+  DATABASE_URL.includes('sslmode=disable');
+
 const sequelize = new Sequelize(DATABASE_URL, {
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
+  logging: false,
+  dialectOptions: isLocalDb
+    ? {}
+    : {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      },
 });
 
 const connectToDatabase = async () => {

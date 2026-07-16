@@ -1,11 +1,22 @@
 const router = require('express').Router();
 
-const { Blog, User } = require('../models');
+const { sequelize } = require('../util/db');
 
-// empty blogs and users (for tests)
+// empty all app tables (for tests)
 router.post('/', async (req, res) => {
-  await Blog.destroy({ truncate: true, cascade: true, restartIdentity: true });
-  await User.destroy({ truncate: true, cascade: true, restartIdentity: true });
+  await sequelize.query(`
+    TRUNCATE TABLE
+      sessions,
+      reading_lists,
+      user_notes,
+      memberships,
+      notes,
+      blogs,
+      teams,
+      users
+    RESTART IDENTITY CASCADE
+  `);
+
   res.status(204).end();
 });
 
